@@ -15,6 +15,7 @@ public:
     explicit VacCleanAnalyzer(int trackerID, QObject *parent = 0);
 
     void extractData(QMap<int, QVector<int> > *trackingData, QString fileName, int xOffset, int yOffset);
+
 signals:
     void finished();
 
@@ -22,11 +23,12 @@ public slots:
     void start();
 
 private:
-    ScenarioModel scenarioWorker;
-    Coverage coverageWorker;
-    Distance distanceWorker;
-    Duration durationWorker;
-    WallDistance wallDistanceWorker;
+    ScenarioModel *scenarioWorker;
+    Coverage *coverageWorker;
+    Distance *distanceWorker;
+    Duration *durationWorker;
+    WallDistance *wallDistanceWorker;
+
     QMap<int, QVector<int> > preprocessTrackingData();
     int trackerID;
 };
