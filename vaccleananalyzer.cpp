@@ -27,8 +27,9 @@ void VacCleanAnalyzer::start()
     QMapIterator<int, QVector<int> > i(trackingData);
     while (i.hasNext()) {
       i.next();
-      qDebug() << i.key() << ": " << i.value() <<endl;
-    }
+      qDebug() << i.key() << ": " << i.value();
+      this->distanceWorker.updateDistance(&(i.value()));
+      qDebug() << "Distance: " << this->distanceWorker.getCurrentDistance();
         //TODO: calculate % covered
         //use coverageWorker.function(...)
 
@@ -37,6 +38,7 @@ void VacCleanAnalyzer::start()
 
         //TODO: calculate distance until % covered
         //use distanceWorker.function(...)
+    }
     //end while
 
     //TODO: calculate average distance to walls

@@ -9,9 +9,18 @@ class Distance : public QObject
 public:
     explicit Distance(QObject *parent = 0);
 
+    void updateDistance(const QVector<int> *data);
+    float getCurrentDistance();
+
 signals:
 
 public slots:
+
+private:
+    bool firstData;
+    int prevX;
+    int prevY;
+    float distance;
 };
 
 #endif // DISTANCE_H
