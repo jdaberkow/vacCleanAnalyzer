@@ -1,7 +1,5 @@
 #include "vaccleananalyzer.h"
 #include <QDebug>
-#include <iostream>
-#include <string>
 #include <QFile>
 
 VacCleanAnalyzer::VacCleanAnalyzer(int trackerID, QObject *parent) : QObject(parent)
@@ -19,25 +17,20 @@ void VacCleanAnalyzer::start()
     */
     QMap<int, QVector<int> > trackingData = this->preprocessTrackingData();
 
-
-    //TODO: calculate model (calculate pixels in image which are static objects)
+    //TODO: calculate model (calculate pixels in image which are static objects?)
     //use scenarioWorker.function(...)
 
-    //while data available
-    QMapIterator<int, QVector<int> > i(trackingData);
-    while (i.hasNext()) {
-      i.next();
-      qDebug() << i.key() << ": " << i.value();
-      this->distanceWorker.updateDistance(&(i.value()));
-      qDebug() << "Distance: " << this->distanceWorker.getCurrentDistance();
-        //TODO: calculate % covered
-        //use coverageWorker.function(...)
+    //Iterate over every line and calculate needed data successively
+    QMapIterator<int, QVector<int> > trackingDataIterator(trackingData);
+    while (trackingDataIterator.hasNext()) {
+        trackingDataIterator.next();
 
-        //TODO: calculate duration until % covered
-        //use durationWorker.function(...)
+        //this->coverageWorker.updateCoverage(&(trackingDataIterator.value()));
+        this->distanceWorker.updateDistance(&(trackingDataIterator.value()));
+        //this->durationWorker.updateDistance(&(trackingDataIterator.value()));
 
-        //TODO: calculate distance until % covered
-        //use distanceWorker.function(...)
+        //if coverage is at 50%, 60%, 70%, 80%, 90%....
+        //then print distance and duration
     }
     //end while
 
@@ -56,13 +49,19 @@ void VacCleanAnalyzer::extractData(QMap<int, QVector<int> > *trackingData, QStri
         {
             QString line = dataCam.readLine();
             QStringList splitLine = line.simplified().split(' ', QString::SkipEmptyParts);
-            if(splitLine.length() > 1 && splitLine.at(1).toInt() != 0){
-                for (int i = 0; i < splitLine.at(1).toInt(); ++i) {
-                    if(splitLine.at(2+i*4).toInt() == this->trackerID){
+
+            if(splitLine.length() > 1 && splitLine.at(1).toInt() != 0)
+            {
+                for (int trackerCount = 0; trackerCount < splitLine.at(1).toInt(); ++trackerCount)
+                {
+                    int stringListIndex = 2 + trackerCount * 4;
+
+                    if(splitLine.at(stringListIndex).toInt() == this->trackerID)
+                    {
                         QVector<int> position(3);
-                        position[0] = splitLine.at(4+i*4).toInt() + xOffset; //X
-                        position[1] = splitLine.at(5+i*4).toInt() + yOffset; //Y
-                        position[2] = splitLine.at(3+i*4).toInt(); //Theta
+                        position[0] = splitLine.at(stringListIndex + 2).toInt() + xOffset; //X
+                        position[1] = splitLine.at(stringListIndex + 3).toInt() + yOffset; //Y
+                        position[2] = splitLine.at(stringListIndex + 1).toInt(); //Theta
                         trackingData->insert(splitLine.at(0).toInt(), position);
                     }
                 }
