@@ -10,16 +10,26 @@ class Duration : public QObject
 public:
     explicit Duration(QObject *parent = 0);
 
-    void updateDuration(int timestamp);
-    double getCurrentDuration();
+    void updateDuration(const qulonglong* timestamp);
+    int getCurrentDuration();
+    QString getFormattedDuration();
 
 signals:
 
 public slots:
 
 private:
-    struct tm firstTimestamp;
-    double duration;
+    int duration;
+
+    bool first;
+
+    int firstHour;
+    int firstMin;
+    int firstSec;
+
+    int currHour;
+    int currMin;
+    int currSec;
 };
 
 #endif // DURATION_H
