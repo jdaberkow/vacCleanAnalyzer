@@ -32,4 +32,8 @@ float Distance::getCurrentDistance()
     return distance;
 }
 
+float Distance::getDistanceInM()
+{
+    return (this->distance/190*60)/100;
+}
 

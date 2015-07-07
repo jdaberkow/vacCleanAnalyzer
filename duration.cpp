@@ -1,5 +1,4 @@
 #include "duration.h"
-#include <QDebug>
 
 Duration::Duration(QObject *parent) : QObject(parent)
 {

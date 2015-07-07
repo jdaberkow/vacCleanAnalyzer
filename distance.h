@@ -11,6 +11,7 @@ public:
 
     void updateDistance(const QVector<int> *data);
     float getCurrentDistance();
+    float getDistanceInM();
 
 signals:
 

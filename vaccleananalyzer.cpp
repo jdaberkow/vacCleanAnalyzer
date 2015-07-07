@@ -46,12 +46,12 @@ void VacCleanAnalyzer::start()
         //then print distance and duration
 
         //DEBUG: print messages every 50 tracking points
-        if (counter % 1000 == 0) {
-            qreal coveragePercent = this->coverageWorker->getCurrentCoveragePercent();
-            qDebug() << "progressed" << counter << "tracking points so far...";
-            qDebug() << "Current Coverage:" << coveragePercent << "% | Current Distance:" << this->distanceWorker->getCurrentDistance();
-            qDebug() << "Duration:" << this->durationWorker->getCurrentDuration() << "sec";
-        }
+//        if (counter % 1000 == 0) {
+//            qreal coveragePercent = this->coverageWorker->getCurrentCoveragePercent();
+//            qDebug() << "progressed" << counter << "tracking points so far...";
+//            qDebug() << "Current Coverage:" << coveragePercent << "% | Current Distance:" << this->distanceWorker->getCurrentDistance();
+//            qDebug() << "Duration:" << this->durationWorker->getCurrentDuration() << "sec";
+//        }
     }
     //end while
 
@@ -60,10 +60,11 @@ void VacCleanAnalyzer::start()
 
     qDebug() << "\nFinished calculations.";
     qDebug() << "Total Trackpoints:" << counter;
-    qDebug() << "Total Coverage:   " << this->coverageWorker->getCurrentCoveragePercent();
-    qDebug() << "Total Distance:   " << this->distanceWorker->getCurrentDistance();
+    qDebug() << "Total Coverage:   " << this->coverageWorker->getCurrentCoveragePercent() << "%";
+    qDebug() << "Total Distance:   " << this->distanceWorker->getCurrentDistance() << "px";
+    qDebug() << "                  " << this->distanceWorker->getDistanceInM() << "m";
     qDebug() << "Total Duration:   " << this->durationWorker->getCurrentDuration() << "sec";
-    qDebug() << "                  " << this->durationWorker->getFormattedDuration() << " (hh:mm:ss)";
+    qDebug() << "                  " << this->durationWorker->getFormattedDuration() << "(hh:mm:ss)";
 
     qDebug() << "\nExporting Coverage Image...";
     this->coverageWorker->exportCurrentCoverageImage();
