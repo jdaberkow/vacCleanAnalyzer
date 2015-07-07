@@ -14,7 +14,7 @@ class VacCleanAnalyzer : public QObject
 public:
     explicit VacCleanAnalyzer(int trackerID, QObject *parent = 0);
 
-    void extractData(QMap<int, QVector<int> > *trackingData, QString fileName, int xOffset, int yOffset);
+    void extractData(QMap<qulonglong, QVector<int> > *trackingData, QString fileName, int xOffset, int yOffset);
 signals:
     void finished();
 
@@ -27,7 +27,7 @@ private:
     Distance distanceWorker;
     Duration durationWorker;
     WallDistance wallDistanceWorker;
-    QMap<int, QVector<int> > preprocessTrackingData();
+    QMap<qulonglong, QVector<int> > preprocessTrackingData();
     int trackerID;
 };
 

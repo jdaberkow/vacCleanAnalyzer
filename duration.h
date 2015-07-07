@@ -2,6 +2,7 @@
 #define DURATION_H
 
 #include <QObject>
+#include <time.h>
 
 class Duration : public QObject
 {
@@ -9,9 +10,16 @@ class Duration : public QObject
 public:
     explicit Duration(QObject *parent = 0);
 
+    void updateDuration(int timestamp);
+    double getCurrentDuration();
+
 signals:
 
 public slots:
+
+private:
+    struct tm firstTimestamp;
+    double duration;
 };
 
 #endif // DURATION_H
