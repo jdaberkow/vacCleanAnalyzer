@@ -34,6 +34,6 @@ float Distance::getCurrentDistance()
 
 float Distance::getDistanceInM()
 {
-    return (this->distance/190*60)/100;
+    return (this->distance/180*60)/100;
 }
 

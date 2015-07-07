@@ -17,6 +17,7 @@ public:
     qreal getCurrentCoveragePercent();
     QImage *getCurrentCoverageImage();
     void exportCurrentCoverageImage();
+    void exportScenarioAndCoverageImage();
 
 signals:
 
@@ -25,6 +26,9 @@ public slots:
 private:
     QImage *coverageImage;
     QPainter *coveragePainter;
+
+    QImage *scenarioImage;
+    QImage createImageWithOverlay(const QImage& baseImage, const QImage& overlayImage);
 
     QPoint prevPoint;
     bool prevPointSet;

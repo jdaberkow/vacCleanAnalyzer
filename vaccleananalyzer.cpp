@@ -4,7 +4,7 @@
 
 #define IMAGE_WIDTH 2000
 #define IMAGE_HEIGHT 2000
-#define ROBOT_RADIUS 100
+#define ROBOT_DIAMETER 90
 
 VacCleanAnalyzer::VacCleanAnalyzer(int trackerID, QObject *parent) : QObject(parent)
 {
@@ -15,7 +15,7 @@ void VacCleanAnalyzer::start()
 {
     qDebug() << "starting vacCleanAnalyzer...";
 
-    this->coverageWorker = new Coverage(IMAGE_WIDTH, IMAGE_HEIGHT, ROBOT_RADIUS);
+    this->coverageWorker = new Coverage(IMAGE_WIDTH, IMAGE_HEIGHT, ROBOT_DIAMETER);
     this->distanceWorker = new Distance();
     this->durationWorker = new Duration();
 
@@ -68,6 +68,7 @@ void VacCleanAnalyzer::start()
 
     qDebug() << "\nExporting Coverage Image...";
     this->coverageWorker->exportCurrentCoverageImage();
+    this->coverageWorker->exportScenarioAndCoverageImage();
 
     emit finished();
 }
