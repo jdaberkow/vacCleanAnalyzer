@@ -1,21 +1,22 @@
 #include "vaccleananalyzer.h"
 #include <QDebug>
 #include <QFile>
+#include <iostream>
 
 #define IMAGE_WIDTH 2000
 #define IMAGE_HEIGHT 2000
-#define ROBOT_DIAMETER 90
 
-VacCleanAnalyzer::VacCleanAnalyzer(int trackerID, QObject *parent) : QObject(parent)
+VacCleanAnalyzer::VacCleanAnalyzer(int trackerID, int diameterInCM, QObject *parent) : QObject(parent)
 {
     this->trackerID = trackerID;
+    this->diameterInCM = diameterInCM;
 }
 
 void VacCleanAnalyzer::start()
 {
-    qDebug() << "starting vacCleanAnalyzer...";
+    std::cout << "starting vacCleanAnalyzer..." << std::endl;
 
-    this->coverageWorker = new Coverage(IMAGE_WIDTH, IMAGE_HEIGHT, ROBOT_DIAMETER);
+    this->coverageWorker = new Coverage(IMAGE_WIDTH, IMAGE_HEIGHT, this->diameterInCM);
     this->distanceWorker = new Distance();
     this->durationWorker = new Duration();
 
@@ -25,14 +26,12 @@ void VacCleanAnalyzer::start()
     */
     QMap<qulonglong, QVector<int> > trackingData = this->preprocessTrackingData();
 
-    //TODO: calculate model (calculate pixels in image which are static objects?)
-    //use scenarioWorker.function(...)
-
     //Iterate over every line and calculate needed data successively
 
     QMapIterator<qulonglong, QVector<int> > trackingDataIterator(trackingData);
 
     int counter = 0;
+    int goal = 300;
 
     while (trackingDataIterator.hasNext()) {
         counter++;
@@ -42,33 +41,48 @@ void VacCleanAnalyzer::start()
         this->coverageWorker->updateCoverage(&(trackingDataIterator.value()));
         this->distanceWorker->updateDistance(&(trackingDataIterator.value()));
 
-        //if coverage is at 50%, 60%, 70%, 80%, 90%....
-        //then print distance and duration
+        //print messages and export image every 5 minutes
+        if (this->durationWorker->getCurrentDuration() >= goal) {
+            std::cout << "\n########################\nAfter " << goal/60 << " minutes:\n" << std::endl;
+            std::cout << "Trackpoints: " << counter << std::endl;
+            std::cout << "Coverage:    " << this->coverageWorker->getCurrentCoveragePercent() << " %" << std::endl;
+            std::cout << "Distance:    " << this->distanceWorker->getCurrentDistance() << " px" << std::endl;
+            std::cout << "             " << this->distanceWorker->getDistanceInM() << " m" << std::endl;
+            std::cout << "Duration:    " << this->durationWorker->getCurrentDuration() << " sec" << std::endl;
+            std::cout << "             " << this->durationWorker->getFormattedDuration().toStdString() << " (hh:mm:ss)" << std::endl;
 
-        //DEBUG: print messages every 50 tracking points
-//        if (counter % 1000 == 0) {
-//            qreal coveragePercent = this->coverageWorker->getCurrentCoveragePercent();
-//            qDebug() << "progressed" << counter << "tracking points so far...";
-//            qDebug() << "Current Coverage:" << coveragePercent << "% | Current Distance:" << this->distanceWorker->getCurrentDistance();
-//            qDebug() << "Duration:" << this->durationWorker->getCurrentDuration() << "sec";
-//        }
+            QString minuteString = QString::number(this->durationWorker->getCurrentDuration() / 60);
+            if (minuteString.size() == 1) {
+                minuteString.push_front(QString("00"));
+            } else if (minuteString.size() == 2) {
+                minuteString.push_front(QString("0"));
+            }
+
+            this->coverageWorker->exportScenarioAndCoverageImage(QString("scenarioAndCoverage_") + minuteString + QString("m.png"));
+
+            goal += 300;
+        }
     }
-    //end while
 
     //TODO: calculate average distance to walls
     //use wallDistanceWorker->function(...)
 
-    qDebug() << "\nFinished calculations.";
-    qDebug() << "Total Trackpoints:" << counter;
-    qDebug() << "Total Coverage:   " << this->coverageWorker->getCurrentCoveragePercent() << "%";
-    qDebug() << "Total Distance:   " << this->distanceWorker->getCurrentDistance() << "px";
-    qDebug() << "                  " << this->distanceWorker->getDistanceInM() << "m";
-    qDebug() << "Total Duration:   " << this->durationWorker->getCurrentDuration() << "sec";
-    qDebug() << "                  " << this->durationWorker->getFormattedDuration() << "(hh:mm:ss)";
+    std::cout << "\n########################\nFinished calculations.\n" << std::endl;
+    std::cout << "Total Trackpoints: " << counter << std::endl;
+    std::cout << "Total Coverage:    " << this->coverageWorker->getCurrentCoveragePercent() << " %" << std::endl;
+    std::cout << "Total Distance:    " << this->distanceWorker->getCurrentDistance() << " px" << std::endl;
+    std::cout << "                   " << this->distanceWorker->getDistanceInM() << " m" << std::endl;
+    std::cout << "Total Duration:    " << this->durationWorker->getCurrentDuration() << " sec" << std::endl;
+    std::cout << "                   " << this->durationWorker->getFormattedDuration().toStdString() << " (hh:mm:ss)" << std::endl;
 
-    qDebug() << "\nExporting Coverage Image...";
+    std::cout << "\nExporting Coverage Image..." << std::endl;
     this->coverageWorker->exportCurrentCoverageImage();
-    this->coverageWorker->exportScenarioAndCoverageImage();
+
+    std::cout << "Exporting combined Scenario&Coverage Images in 5 minute steps..." << std::endl;
+    this->coverageWorker->exportScenarioAndCoverageImage(QString("scenarioAndCoverage_final.png"));
+
+    std::cout << "\nInsert your data into the following spreadsheet:" << std::endl;
+    std::cout << "    https://docs.google.com/spreadsheets/d/1Hql7qDrgEm0oKqIBd6pix0cMSshNFj__7QqPNpNRtXE/edit?usp=sharing\n" << std::endl;
 
     emit finished();
 }
@@ -92,8 +106,8 @@ void VacCleanAnalyzer::extractData(QMap<qulonglong, QVector<int> > *trackingData
                     if(splitLine.at(stringListIndex).toInt() == this->trackerID)
                     {
                         QVector<int> position(3);
-                        position[0] = splitLine.at(stringListIndex + 2).toInt() + xOffset; //X
-                        position[1] = splitLine.at(stringListIndex + 3).toInt() + yOffset; //Y
+                        position[0] = splitLine.at(stringListIndex + 2).toInt() * 1.03 + xOffset; //X
+                        position[1] = splitLine.at(stringListIndex + 3).toInt() * 1.03 + yOffset; //Y
                         position[2] = splitLine.at(stringListIndex + 1).toInt(); //Theta
                         QString tmp = splitLine.at(0);
                         trackingData->insert((tmp.remove(QChar('.'), Qt::CaseSensitive)).toULongLong(), position);
@@ -107,9 +121,9 @@ void VacCleanAnalyzer::extractData(QMap<qulonglong, QVector<int> > *trackingData
 
 QMap<qulonglong, QVector<int> > VacCleanAnalyzer::preprocessTrackingData(){
     QMap<qulonglong, QVector<int> > trackingData;
-    extractData(&trackingData, "CAMERA_1_tracking_data.txt", 1000, 0);
-    extractData(&trackingData, "CAMERA_2_tracking_data.txt", 0, 0);
-    extractData(&trackingData, "CAMERA_3_tracking_data.txt", 0, 1000);
-    extractData(&trackingData, "CAMERA_4_tracking_data.txt", 1000, 1000);
+    extractData(&trackingData, "CAMERA_1_tracking_data.txt", 975, 0);
+    extractData(&trackingData, "CAMERA_2_tracking_data.txt", 25, 0);
+    extractData(&trackingData, "CAMERA_3_tracking_data.txt", 25, 960);
+    extractData(&trackingData, "CAMERA_4_tracking_data.txt", 975, 960);
     return trackingData;
 }

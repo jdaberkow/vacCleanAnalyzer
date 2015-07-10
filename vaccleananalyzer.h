@@ -2,7 +2,6 @@
 #define VACCLEANANALYZER_H
 
 #include <QObject>
-#include "scenariomodel.h"
 #include "coverage.h"
 #include "distance.h"
 #include "duration.h"
@@ -12,7 +11,7 @@ class VacCleanAnalyzer : public QObject
 {
     Q_OBJECT
 public:
-    explicit VacCleanAnalyzer(int trackerID, QObject *parent = 0);
+    explicit VacCleanAnalyzer(int trackerID, int diameterInCM, QObject *parent = 0);
 
     void extractData(QMap<qulonglong, QVector<int> > *trackingData, QString fileName, int xOffset, int yOffset);
 
@@ -23,7 +22,6 @@ public slots:
     void start();
 
 private:
-    ScenarioModel *scenarioWorker;
     Coverage *coverageWorker;
     Distance *distanceWorker;
     Duration *durationWorker;
@@ -31,6 +29,7 @@ private:
 
     QMap<qulonglong, QVector<int> > preprocessTrackingData();
     int trackerID;
+    int diameterInCM;
 };
 
 #endif // VACCLEANANALYZER_H

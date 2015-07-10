@@ -80,8 +80,22 @@ QString Duration::getFormattedDuration()
     if (this->currHour >= this->firstHour) {
         hour += (this->currHour - this->firstHour);
     }
-    QString formattedDuration;
-    formattedDuration = QString::number(hour) + ":" + QString::number(min) + ":" + QString::number(sec);
+
+    QString formattedHour = QString::number(hour);
+    if (hour < 10) {
+        formattedHour = "0" + formattedHour;
+    }
+    QString formattedMin = QString::number(min);
+    if (min < 10) {
+        formattedMin = "0" + formattedMin;
+    }
+    QString formattedSec = QString::number(sec);
+    if (sec < 10) {
+        formattedSec = "0" + formattedSec;
+    }
+
+
+    QString formattedDuration = formattedHour + ":" + formattedMin + ":" + formattedSec;
     return formattedDuration;
 }
 

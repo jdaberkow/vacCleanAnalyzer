@@ -9,11 +9,11 @@ Coverage::Coverage(QObject *parent) : QObject(parent)
 
 }
 
-Coverage::Coverage(int width, int height, int diameter, QObject *parent) : QObject(parent)
+Coverage::Coverage(int width, int height, int diameterInCM, QObject *parent) : QObject(parent)
 {
     this->width = width;
     this->height = height;
-    this->diameter = diameter;
+    this->diameterInPX = diameterInCM * 3;
 
     this->coverageImage = new QImage(width, height, QImage::Format_ARGB32);
     this->coverageImage->fill(Qt::transparent);
@@ -21,7 +21,7 @@ Coverage::Coverage(int width, int height, int diameter, QObject *parent) : QObje
     this->scenarioImage = new QImage("scenario_with_walls.png", "png");
 
     this->coveragePainter = new QPainter(this->coverageImage);
-    this->coveragePainter->setPen(QPen(Qt::green,diameter,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
+    this->coveragePainter->setPen(QPen(Qt::green,this->diameterInPX,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
 
     this->prevPoint = QPoint(0, 0);
     this->prevPointSet = false;
@@ -91,10 +91,10 @@ void Coverage::exportCurrentCoverageImage()
     this->coverageImage->save(&file, "PNG");
 }
 
-void Coverage::exportScenarioAndCoverageImage()
+void Coverage::exportScenarioAndCoverageImage(QString filename)
 {
     QImage overlay = createImageWithOverlay(*this->coverageImage, *this->scenarioImage);
-    QFile file("scenarioAndCoverage.png");
+    QFile file(filename);
     file.open(QIODevice::WriteOnly);
     overlay.save(&file, "PNG");
 }

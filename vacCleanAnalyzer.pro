@@ -20,7 +20,6 @@ SOURCES += main.cpp \
     walldistance.cpp \
     duration.cpp \
     distance.cpp \
-    scenariomodel.cpp \
     coverage.cpp
 
 HEADERS += \
@@ -28,5 +27,4 @@ HEADERS += \
     walldistance.h \
     duration.h \
     distance.h \
-    scenariomodel.h \
     coverage.h
